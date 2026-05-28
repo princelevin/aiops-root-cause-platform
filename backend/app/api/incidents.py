@@ -6,6 +6,7 @@ from app.repositories.incident_repository import (
     get_incidents,
     get_incident_by_id,
 )
+from app.repositories.timeline_repository import get_timeline_by_incident
 
 router = APIRouter(prefix="/api/incidents", tags=["Incidents"])
 
@@ -21,6 +22,16 @@ def incident_to_dict(incident):
         "failure_type": incident.failure_type,
         "latency_ms": incident.latency_ms,
         "created_at": incident.created_at,
+    }
+
+
+def timeline_to_dict(event):
+    return {
+        "id": event.id,
+        "incident_id": event.incident_id,
+        "event_type": event.event_type,
+        "description": event.description,
+        "timestamp": event.timestamp,
     }
 
 
@@ -41,3 +52,21 @@ def get_incident(incident_id: int, db: Session = Depends(get_db)):
         )
 
     return {"incident": incident_to_dict(incident)}
+
+
+@router.get("/{incident_id}/timeline")
+def get_incident_timeline(incident_id: int, db: Session = Depends(get_db)):
+    incident = get_incident_by_id(db, incident_id)
+
+    if incident is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Incident not found",
+        )
+
+    timeline = get_timeline_by_incident(db, incident_id)
+
+    return {
+        "incident": incident_to_dict(incident),
+        "timeline": [timeline_to_dict(event) for event in timeline],
+    }

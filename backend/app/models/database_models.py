@@ -52,3 +52,12 @@ class FailureDB(Base):
     failure_type = Column(String)
     probable_cause = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+class IncidentTimelineDB(Base):
+    __tablename__ = "incident_timeline"
+
+    id = Column(Integer, primary_key=True, index=True)
+    incident_id = Column(Integer, index=True)
+    event_type = Column(String)
+    description = Column(String)
+    timestamp = Column(DateTime, default=datetime.utcnow)

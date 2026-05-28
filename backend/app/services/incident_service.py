@@ -1,4 +1,5 @@
 from app.repositories.incident_repository import create_incident
+from app.repositories.timeline_repository import create_timeline_event
 
 
 def calculate_severity(failure_type: str, latency_ms: int):
@@ -36,4 +37,27 @@ def build_incident_from_failure(failure: dict):
 
 def create_incident_from_failure(db, failure: dict):
     incident_data = build_incident_from_failure(failure)
-    return create_incident(db, incident_data)
+    incident = create_incident(db, incident_data)
+
+    create_timeline_event(
+        db,
+        incident.id,
+        "INCIDENT_CREATED",
+        f"Incident created for {incident.service}",
+    )
+
+    create_timeline_event(
+        db,
+        incident.id,
+        "FAILURE_DETECTED",
+        failure["message"],
+    )
+
+    create_timeline_event(
+        db,
+        incident.id,
+        "SEVERITY_ASSIGNED",
+        f"Severity assigned as {incident.severity}",
+    )
+
+    return incident
