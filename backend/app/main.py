@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.database import engine, Base
+from app.models import database_models
+
 from app.api.health import router as health_router
 from app.api.services import router as services_router
 from app.api.incidents import router as incidents_router
@@ -11,6 +14,7 @@ from app.api.metrics import router as metrics_router
 from app.api.anomalies import router as anomalies_router
 
 app = FastAPI(title="AIOps Root Cause Platform")
+Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
