@@ -1,7 +1,4 @@
-from datetime import datetime
-
-incidents = []
-incident_id_counter = 1
+from app.repositories.incident_repository import create_incident
 
 
 def calculate_severity(failure_type: str, latency_ms: int):
@@ -20,16 +17,13 @@ def calculate_severity(failure_type: str, latency_ms: int):
     return "P3"
 
 
-def create_incident_from_failure(failure: dict):
-    global incident_id_counter
-
+def build_incident_from_failure(failure: dict):
     severity = calculate_severity(
         failure_type=failure["failure_type"],
         latency_ms=failure["latency_ms"],
     )
 
-    incident = {
-        "id": incident_id_counter,
+    return {
         "service": failure["service"],
         "title": failure["message"],
         "severity": severity,
@@ -37,22 +31,9 @@ def create_incident_from_failure(failure: dict):
         "root_cause_hint": failure["probable_cause"],
         "failure_type": failure["failure_type"],
         "latency_ms": failure["latency_ms"],
-        "created_at": datetime.utcnow().isoformat(),
     }
 
-    incidents.append(incident)
-    incident_id_counter += 1
 
-    return incident
-
-
-def get_incidents():
-    return incidents[-100:]
-
-
-def get_incident_by_id(incident_id: int):
-    for incident in incidents:
-        if incident["id"] == incident_id:
-            return incident
-
-    return None
+def create_incident_from_failure(db, failure: dict):
+    incident_data = build_incident_from_failure(failure)
+    return create_incident(db, incident_data)

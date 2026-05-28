@@ -1,4 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
 from app.services.failure_injector import (
     inject_failure,
     get_failures,
@@ -15,7 +18,7 @@ def list_failure_scenarios():
 
 
 @router.post("/inject/{failure_type}")
-def create_failure(failure_type: str):
+def create_failure(failure_type: str, db: Session = Depends(get_db)):
     failure = inject_failure(failure_type)
 
     if failure is None:
@@ -24,12 +27,22 @@ def create_failure(failure_type: str):
             detail="Failure type not found",
         )
 
-    incident = create_incident_from_failure(failure)
+    incident = create_incident_from_failure(db, failure)
 
     return {
         "message": "Failure injected and incident created successfully",
         "failure": failure,
-        "incident": incident,
+        "incident": {
+            "id": incident.id,
+            "service": incident.service,
+            "title": incident.title,
+            "severity": incident.severity,
+            "status": incident.status,
+            "root_cause_hint": incident.root_cause_hint,
+            "failure_type": incident.failure_type,
+            "latency_ms": incident.latency_ms,
+            "created_at": incident.created_at,
+        },
     }
 
 

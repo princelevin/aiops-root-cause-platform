@@ -7,7 +7,21 @@ CPU_THRESHOLD = 85.0
 MEMORY_THRESHOLD = 80.0
 
 
-def detect_anomalies():
+def incident_to_dict(incident):
+    return {
+        "id": incident.id,
+        "service": incident.service,
+        "title": incident.title,
+        "severity": incident.severity,
+        "status": incident.status,
+        "root_cause_hint": incident.root_cause_hint,
+        "failure_type": incident.failure_type,
+        "latency_ms": incident.latency_ms,
+        "created_at": incident.created_at,
+    }
+
+
+def detect_anomalies(db):
     metrics = get_metrics()
     detected_anomalies = []
 
@@ -37,12 +51,12 @@ def detect_anomalies():
                 "timestamp": metric["timestamp"],
             }
 
-            incident = create_incident_from_failure(failure)
+            incident = create_incident_from_failure(db, failure)
 
             detected_anomalies.append({
                 "metric": metric,
                 "reasons": anomaly_reasons,
-                "incident": incident,
+                "incident": incident_to_dict(incident),
             })
 
     return detected_anomalies
