@@ -126,6 +126,27 @@ body {
   font-weight: bold;
 }
 
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.actions button {
+  background: #0369a1;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.actions button:hover {
+  background: #0284c7;
+}
+
 @media (max-width: 900px) {
   .app {
     flex-direction: column;
