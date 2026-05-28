@@ -6,6 +6,7 @@ from app.api.simulation import router as simulation_router
 from app.api.logs import router as logs_router
 from app.api.failures import router as failures_router
 from app.api.metrics import router as metrics_router
+from app.api.anomalies import router as anomalies_router
 
 app = FastAPI(title="AIOps Root Cause Platform")
 
@@ -16,3 +17,4 @@ app.include_router(simulation_router)
 app.include_router(logs_router)
 app.include_router(failures_router)
 app.include_router(metrics_router)
+app.include_router(anomalies_router)
