@@ -4,6 +4,7 @@ from app.services.failure_injector import (
     get_failures,
     get_failure_scenarios,
 )
+from app.services.incident_service import create_incident_from_failure
 
 router = APIRouter(prefix="/api/failures", tags=["Failures"])
 
@@ -23,9 +24,12 @@ def create_failure(failure_type: str):
             detail="Failure type not found",
         )
 
+    incident = create_incident_from_failure(failure)
+
     return {
-        "message": "Failure injected successfully",
+        "message": "Failure injected and incident created successfully",
         "failure": failure,
+        "incident": incident,
     }
 
 
