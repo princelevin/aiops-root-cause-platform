@@ -2,6 +2,11 @@ from app.services.ollama_service import ask_ollama
 
 
 def generate_ai_rca(incident):
+    """
+    Generate AI RCA for one incident.
+    """
+
+    # Build prompt using incident details
     prompt = f"""
 You are an expert AIOps root cause analysis assistant.
 
@@ -24,4 +29,5 @@ Return a short structured response with:
 Be practical and concise.
 """
 
+    # Send prompt to local Ollama model
     return ask_ollama(prompt)

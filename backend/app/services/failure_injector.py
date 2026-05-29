@@ -1,9 +1,12 @@
 from datetime import datetime
 
+
+# Simple in-memory storage for generated failures
 failure_id_counter = 1
 failures = []
 
 
+# Predefined failure scenarios used for demo/testing
 FAILURE_SCENARIOS = {
     "redis_timeout": {
         "service": "payment-service",
@@ -49,13 +52,19 @@ FAILURE_SCENARIOS = {
 
 
 def inject_failure(failure_type: str):
+    """
+    Create one fake failure based on selected scenario.
+    """
+
     global failure_id_counter
 
+    # Stop if unsupported failure type is passed
     if failure_type not in FAILURE_SCENARIOS:
         return None
 
     scenario = FAILURE_SCENARIOS[failure_type]
 
+    # Build failure object from scenario data
     failure = {
         "id": failure_id_counter,
         "service": scenario["service"],
@@ -67,6 +76,7 @@ def inject_failure(failure_type: str):
         "timestamp": datetime.utcnow().isoformat(),
     }
 
+    # Save failure in memory
     failures.append(failure)
     failure_id_counter += 1
 
@@ -74,8 +84,16 @@ def inject_failure(failure_type: str):
 
 
 def get_failures():
+    """
+    Return latest generated failures.
+    """
+
     return failures[-100:]
 
 
 def get_failure_scenarios():
+    """
+    Return supported failure scenario names.
+    """
+
     return list(FAILURE_SCENARIOS.keys())

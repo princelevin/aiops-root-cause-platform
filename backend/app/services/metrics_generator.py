@@ -1,12 +1,17 @@
 from datetime import datetime
 import random
 
+
+# In-memory storage for generated metrics
 metrics = []
 metric_id_counter = 1
 
+
+# Demo services used in the platform
 SERVICES = ["payment-service", "order-service", "inventory-service"]
 
 
+# Metric scenarios used to simulate normal and abnormal service behavior
 SCENARIOS = {
     "normal": {
         "latency_range": (80, 300),
@@ -42,14 +47,20 @@ SCENARIOS = {
 
 
 def generate_metric(scenario: str = "normal"):
+    """
+    Generate one fake metric record.
+    """
+
     global metric_id_counter
 
+    # Fallback to normal scenario if invalid scenario is passed
     if scenario not in SCENARIOS:
         scenario = "normal"
 
     config = SCENARIOS[scenario]
     service = random.choice(SERVICES)
 
+    # Build metric using scenario ranges
     metric = {
         "id": metric_id_counter,
         "service": service,
@@ -62,6 +73,7 @@ def generate_metric(scenario: str = "normal"):
         "timestamp": datetime.utcnow().isoformat(),
     }
 
+    # Store metric in memory
     metrics.append(metric)
     metric_id_counter += 1
 
@@ -69,16 +81,29 @@ def generate_metric(scenario: str = "normal"):
 
 
 def generate_metrics(count: int = 10, scenario: str = "normal"):
+    """
+    Generate multiple metrics for a selected scenario.
+    """
+
     return [generate_metric(scenario) for _ in range(count)]
 
 
 def get_metrics():
+    """
+    Return latest generated metrics.
+    """
+
     return metrics[-100:]
 
 
 def get_latest_service_metrics():
+    """
+    Return latest metric for each service.
+    """
+
     latest = {}
 
+    # Keep overwriting so only latest metric per service remains
     for metric in metrics:
         latest[metric["service"]] = metric
 
@@ -86,4 +111,8 @@ def get_latest_service_metrics():
 
 
 def get_metric_scenarios():
+    """
+    Return available metric scenarios.
+    """
+
     return list(SCENARIOS.keys())

@@ -4,14 +4,24 @@ from app.repositories.rca_repository import get_latest_rca_by_incident_id
 
 
 def generate_incident_report(db, incident_id: int):
+    """
+    Generate full report for one incident.
+    """
+
+    # Get incident details
     incident = get_incident_by_id(db, incident_id)
 
+    # Stop if incident does not exist
     if not incident:
         return None
 
-    timeline = get_timeline_events_by_incident_id(db, incident_id)    
+    # Get timeline events for this incident
+    timeline = get_timeline_events_by_incident_id(db, incident_id)
+
+    # Get latest RCA for this incident
     rca = get_latest_rca_by_incident_id(db, incident_id)
 
+    # Build final report response
     report = {
         "incident_id": incident.id,
         "service": incident.service,

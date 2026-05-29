@@ -3,6 +3,7 @@ from datetime import datetime
 
 
 class LogEntry(BaseModel):
+    # API schema for one generated log entry
     id: int
     service: str
     level: str

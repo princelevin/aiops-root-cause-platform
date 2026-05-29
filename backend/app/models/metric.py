@@ -3,6 +3,7 @@ from datetime import datetime
 
 
 class MetricEntry(BaseModel):
+    # API schema for one service metric entry
     id: int
     service: str
     latency_ms: int

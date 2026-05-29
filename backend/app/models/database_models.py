@@ -1,9 +1,11 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
 from datetime import datetime
+
 from app.core.database import Base
 
 
 class IncidentDB(Base):
+    # Stores incidents created from failures or anomalies
     __tablename__ = "incidents"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -18,6 +20,7 @@ class IncidentDB(Base):
 
 
 class LogDB(Base):
+    # Stores generated service logs
     __tablename__ = "logs"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -29,6 +32,7 @@ class LogDB(Base):
 
 
 class MetricDB(Base):
+    # Stores service metrics like latency, error rate, CPU, and memory
     __tablename__ = "metrics"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -42,6 +46,7 @@ class MetricDB(Base):
 
 
 class FailureDB(Base):
+    # Stores simulated failure details
     __tablename__ = "failures"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -53,7 +58,9 @@ class FailureDB(Base):
     probable_cause = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
+
 class IncidentTimelineDB(Base):
+    # Stores step-by-step history for each incident
     __tablename__ = "incident_timeline"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -62,7 +69,9 @@ class IncidentTimelineDB(Base):
     description = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
+
 class RootCauseAnalysisDB(Base):
+    # Stores RCA result generated for an incident
     __tablename__ = "root_cause_analyses"
 
     id = Column(Integer, primary_key=True, index=True)

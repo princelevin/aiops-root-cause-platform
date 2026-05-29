@@ -10,26 +10,45 @@ from app.services.failure_injector import (
 )
 from app.services.incident_service import create_incident_from_failure
 
+
+# APIs for injecting fake production failures
 router = APIRouter(prefix="/api/failures", tags=["Failures"])
 
 
 @router.get("/scenarios")
 def list_failure_scenarios():
-    return {"scenarios": get_failure_scenarios()}
+    """
+    Show all failure types supported by the system.
+    """
+
+    return {
+        "scenarios": get_failure_scenarios()
+    }
 
 
 @router.post("/inject/{failure_type}")
-def create_failure(failure_type: str, db: Session = Depends(get_db)):
+def create_failure(
+    failure_type: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Inject a failure and create an incident from it.
+    """
+
+    # Create fake failure based on selected type
     failure = inject_failure(failure_type)
 
+    # Stop if invalid failure type is passed
     if failure is None:
         raise HTTPException(
             status_code=404,
             detail="Failure type not found",
         )
 
+    # Convert failure into incident
     incident = create_incident_from_failure(db, failure)
 
+    # Prepare incident response payload
     incident_payload = {
         "id": incident.id,
         "service": incident.service,
@@ -42,6 +61,7 @@ def create_failure(failure_type: str, db: Session = Depends(get_db)):
         "created_at": str(incident.created_at),
     }
 
+    # Add incident-created event to queue
     publish_event(
         event_type="INCIDENT_CREATED",
         payload=incident_payload,
@@ -56,4 +76,10 @@ def create_failure(failure_type: str, db: Session = Depends(get_db)):
 
 @router.get("")
 def list_failures():
-    return {"failures": get_failures()}
+    """
+    Show all generated failures.
+    """
+
+    return {
+        "failures": get_failures()
+    }

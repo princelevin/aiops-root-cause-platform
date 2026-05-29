@@ -4,12 +4,18 @@ from app.services.severity_service import calculate_severity, get_severity_reaso
 
 
 def build_incident_from_failure(failure: dict):
+    """
+    Build incident data from a failure.
+    """
+
+    # Calculate severity based on failure type and latency
     severity = calculate_severity(
         failure_type=failure["failure_type"],
         latency_ms=failure["latency_ms"],
         service=failure["service"],
     )
 
+    # Prepare incident data for saving
     return {
         "service": failure["service"],
         "title": failure["message"],
@@ -22,9 +28,17 @@ def build_incident_from_failure(failure: dict):
 
 
 def create_incident_from_failure(db, failure: dict):
+    """
+    Create incident and timeline events from a failure.
+    """
+
+    # Build incident payload
     incident_data = build_incident_from_failure(failure)
+
+    # Save incident in DB
     incident = create_incident(db, incident_data)
 
+    # Add timeline event: incident created
     create_timeline_event(
         db,
         incident.id,
@@ -32,6 +46,7 @@ def create_incident_from_failure(db, failure: dict):
         f"Incident created for {incident.service}",
     )
 
+    # Add timeline event: failure detected
     create_timeline_event(
         db,
         incident.id,
@@ -39,6 +54,7 @@ def create_incident_from_failure(db, failure: dict):
         failure["message"],
     )
 
+    # Add timeline event: severity assigned
     create_timeline_event(
         db,
         incident.id,

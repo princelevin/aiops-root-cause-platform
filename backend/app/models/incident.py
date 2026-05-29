@@ -3,6 +3,7 @@ from datetime import datetime
 
 
 class Incident(BaseModel):
+    # API schema for returning incident details
     id: int
     service: str
     title: str

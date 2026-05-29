@@ -1,6 +1,8 @@
 from app.services.metrics_generator import get_metrics
 from app.services.incident_service import create_incident_from_failure
 
+
+# Thresholds used to decide if a metric is abnormal
 LATENCY_THRESHOLD = 900
 ERROR_RATE_THRESHOLD = 10.0
 CPU_THRESHOLD = 85.0
@@ -8,6 +10,10 @@ MEMORY_THRESHOLD = 80.0
 
 
 def incident_to_dict(incident):
+    """
+    Convert incident object into JSON response.
+    """
+
     return {
         "id": incident.id,
         "service": incident.service,
@@ -22,24 +28,34 @@ def incident_to_dict(incident):
 
 
 def detect_anomalies(db):
+    """
+    Detect abnormal metrics and create incidents.
+    """
+
+    # Get latest generated metrics
     metrics = get_metrics()
     detected_anomalies = []
 
     for metric in metrics:
         anomaly_reasons = []
 
+        # Check latency threshold
         if metric["latency_ms"] >= LATENCY_THRESHOLD:
             anomaly_reasons.append("High latency detected")
 
+        # Check error rate threshold
         if metric["error_rate"] >= ERROR_RATE_THRESHOLD:
             anomaly_reasons.append("High error rate detected")
 
+        # Check CPU threshold
         if metric["cpu_usage"] >= CPU_THRESHOLD:
             anomaly_reasons.append("High CPU usage detected")
 
+        # Check memory threshold
         if metric["memory_usage"] >= MEMORY_THRESHOLD:
             anomaly_reasons.append("High memory usage detected")
 
+        # If any threshold is crossed, create an incident
         if anomaly_reasons:
             failure = {
                 "service": metric["service"],

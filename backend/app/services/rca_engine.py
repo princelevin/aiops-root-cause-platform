@@ -1,24 +1,32 @@
 def analyze_root_cause(incident):
+    """
+    Generate rule-based RCA for one incident.
+    """
+
     failure_type = incident.failure_type
     service = incident.service
     latency = incident.latency_ms
     severity = incident.severity
 
+    # RCA for Redis-related failures
     if failure_type == "redis_timeout":
         root_cause = "Redis connection timeout or Redis connection pool exhaustion"
         recommendation = "Check Redis availability, connection pool limits, and network latency between services."
         confidence = 0.92
 
+    # RCA for database connection issues
     elif failure_type == "db_pool_exhausted":
         root_cause = "Database connection pool exhausted due to high concurrent requests"
         recommendation = "Increase DB pool size, optimize slow queries, and add request throttling."
         confidence = 0.9
 
+    # RCA for payment provider issues
     elif failure_type == "payment_gateway_failure":
         root_cause = "External payment provider outage or payment gateway timeout"
         recommendation = "Enable retry with exponential backoff and route traffic to fallback payment provider."
         confidence = 0.88
 
+    # RCA for metric-based anomalies
     elif failure_type == "metric_anomaly":
         if latency >= 900:
             root_cause = "High latency caused by service degradation or overloaded downstream dependency"
@@ -29,11 +37,13 @@ def analyze_root_cause(incident):
             recommendation = "Inspect service metrics, logs, and recent traffic spikes."
             confidence = 0.75
 
+    # Fallback RCA when failure pattern is unknown
     else:
         root_cause = "Unknown operational failure pattern"
         recommendation = "Review logs, metrics, dependencies, and recent deployments."
         confidence = 0.6
 
+    # Return RCA in a consistent format
     return {
         "incident_id": incident.id,
         "service": service,

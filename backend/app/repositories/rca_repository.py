@@ -2,6 +2,11 @@ from app.models.database_models import RootCauseAnalysisDB
 
 
 def save_rca_analysis(db, analysis: dict):
+    """
+    Save RCA result in the database.
+    """
+
+    # Create RCA DB object
     rca = RootCauseAnalysisDB(
         incident_id=analysis["incident_id"],
         service=analysis["service"],
@@ -12,6 +17,7 @@ def save_rca_analysis(db, analysis: dict):
         confidence_score=analysis["confidence_score"],
     )
 
+    # Save RCA result
     db.add(rca)
     db.commit()
     db.refresh(rca)
@@ -20,6 +26,10 @@ def save_rca_analysis(db, analysis: dict):
 
 
 def get_rca_history(db):
+    """
+    Get all RCA results, latest first.
+    """
+
     return (
         db.query(RootCauseAnalysisDB)
         .order_by(RootCauseAnalysisDB.id.desc())
@@ -28,6 +38,10 @@ def get_rca_history(db):
 
 
 def get_rca_by_incident_id(db, incident_id: int):
+    """
+    Get latest RCA for one incident.
+    """
+
     return (
         db.query(RootCauseAnalysisDB)
         .filter(RootCauseAnalysisDB.incident_id == incident_id)
@@ -36,11 +50,10 @@ def get_rca_by_incident_id(db, incident_id: int):
     )
 
 
-# Needed by Day 24 Incident Report Generator
 def get_latest_rca_by_incident_id(db, incident_id: int):
-    return (
-        db.query(RootCauseAnalysisDB)
-        .filter(RootCauseAnalysisDB.incident_id == incident_id)
-        .order_by(RootCauseAnalysisDB.id.desc())
-        .first()
-    )
+    """
+    Same as get_rca_by_incident_id.
+    Used by report generation.
+    """
+
+    return get_rca_by_incident_id(db, incident_id)
