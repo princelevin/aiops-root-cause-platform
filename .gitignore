@@ -2,4 +2,7 @@ venv/
 node_modules/
 .env
 __pycache__/
-dist/backend/aiops.db
+dist/
+backend/aiops.db
+.DS_Store
+backend/.DS_Store
