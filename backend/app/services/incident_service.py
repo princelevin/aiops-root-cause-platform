@@ -1,28 +1,10 @@
 from app.repositories.incident_repository import create_incident
 from app.repositories.timeline_repository import create_timeline_event
-
-
-def calculate_severity(failure_type: str, latency_ms: int):
-    if failure_type == "payment_gateway_failure":
-        return "P0"
-
-    if failure_type in ["redis_timeout", "db_pool_exhausted"]:
-        return "P1"
-
-    if latency_ms >= 900:
-        return "P1"
-
-    if latency_ms >= 700:
-        return "P2"
-
-    return "P3"
+from app.services.severity_engine import calculate_severity
 
 
 def build_incident_from_failure(failure: dict):
-    severity = calculate_severity(
-        failure_type=failure["failure_type"],
-        latency_ms=failure["latency_ms"],
-    )
+    severity = calculate_severity(failure)
 
     return {
         "service": failure["service"],

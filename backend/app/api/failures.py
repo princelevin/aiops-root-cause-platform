@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.services.event_queue import publish_event
 from app.services.failure_injector import (
     inject_failure,
     get_failures,
@@ -29,20 +30,27 @@ def create_failure(failure_type: str, db: Session = Depends(get_db)):
 
     incident = create_incident_from_failure(db, failure)
 
+    incident_payload = {
+        "id": incident.id,
+        "service": incident.service,
+        "title": incident.title,
+        "severity": incident.severity,
+        "status": incident.status,
+        "root_cause_hint": incident.root_cause_hint,
+        "failure_type": incident.failure_type,
+        "latency_ms": incident.latency_ms,
+        "created_at": str(incident.created_at),
+    }
+
+    publish_event(
+        event_type="INCIDENT_CREATED",
+        payload=incident_payload,
+    )
+
     return {
-        "message": "Failure injected and incident created successfully",
+        "message": "Failure injected, incident created, and event published successfully",
         "failure": failure,
-        "incident": {
-            "id": incident.id,
-            "service": incident.service,
-            "title": incident.title,
-            "severity": incident.severity,
-            "status": incident.status,
-            "root_cause_hint": incident.root_cause_hint,
-            "failure_type": incident.failure_type,
-            "latency_ms": incident.latency_ms,
-            "created_at": incident.created_at,
-        },
+        "incident": incident_payload,
     }
 
 
