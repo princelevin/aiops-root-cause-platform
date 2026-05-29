@@ -1,10 +1,14 @@
 from app.repositories.incident_repository import create_incident
 from app.repositories.timeline_repository import create_timeline_event
-from app.services.severity_engine import calculate_severity
+from app.services.severity_service import calculate_severity, get_severity_reason
 
 
 def build_incident_from_failure(failure: dict):
-    severity = calculate_severity(failure)
+    severity = calculate_severity(
+        failure_type=failure["failure_type"],
+        latency_ms=failure["latency_ms"],
+        service=failure["service"],
+    )
 
     return {
         "service": failure["service"],
@@ -39,7 +43,7 @@ def create_incident_from_failure(db, failure: dict):
         db,
         incident.id,
         "SEVERITY_ASSIGNED",
-        f"Severity assigned as {incident.severity}",
+        f"Severity assigned as {incident.severity} - {get_severity_reason(incident.severity)}",
     )
 
     return incident
