@@ -14,6 +14,8 @@ from app.api.metrics import router as metrics_router
 from app.api.anomalies import router as anomalies_router
 from app.api.rca import router as rca_router
 from app.api.correlation import router as correlation_router
+from app.api.ai import router as ai_router
+from app.api.ai_rca import router as ai_rca_router
 
 app = FastAPI(title="AIOps Root Cause Platform")
 Base.metadata.create_all(bind=engine)
@@ -36,3 +38,5 @@ app.include_router(metrics_router)
 app.include_router(anomalies_router)
 app.include_router(rca_router)
 app.include_router(correlation_router)
+app.include_router(ai_router)
+app.include_router(ai_rca_router)
