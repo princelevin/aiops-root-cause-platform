@@ -61,3 +61,16 @@ class IncidentTimelineDB(Base):
     event_type = Column(String)
     description = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+class RootCauseAnalysisDB(Base):
+    __tablename__ = "root_cause_analyses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    incident_id = Column(Integer, index=True)
+    service = Column(String, index=True)
+    severity = Column(String)
+    failure_type = Column(String)
+    root_cause = Column(String)
+    recommendation = Column(String)
+    confidence_score = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
