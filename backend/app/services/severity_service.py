@@ -8,7 +8,7 @@ def calculate_severity(failure_type: str, latency_ms: int, service: str = ""):
     if failure_type == "redis_timeout":
         return "P1"
 
-    if latency_ms >= 1000:
+    if latency_ms >= 900:
         return "P1"
 
     if latency_ms >= 700:

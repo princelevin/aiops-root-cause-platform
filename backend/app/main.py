@@ -18,6 +18,7 @@ from app.api.ai import router as ai_router
 from app.api.ai_rca import router as ai_rca_router
 from app.api.events import router as events_router
 from app.api.reports import router as reports_router
+from app.api.guardrails import router as guardrails_router
 
 app = FastAPI(title="AIOps Root Cause Platform")
 Base.metadata.create_all(bind=engine)
@@ -44,3 +45,4 @@ app.include_router(ai_router)
 app.include_router(ai_rca_router)
 app.include_router(events_router)
 app.include_router(reports_router)
+app.include_router(guardrails_router)
