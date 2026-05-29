@@ -1,162 +1,147 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
-
 function App() {
-  const [services, setServices] = useState([]);
   const [incidents, setIncidents] = useState([]);
   const [metrics, setMetrics] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  async function fetchDashboardData() {
+  const BACKEND_URL = "http://127.0.0.1:8000";
+
+  // Load incidents
+  const loadIncidents = async () => {
     try {
-      const [servicesRes, incidentsRes, metricsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/services`),
-        fetch(`${API_BASE_URL}/api/incidents`),
-        fetch(`${API_BASE_URL}/api/metrics/latest`),
-      ]);
+      const response = await fetch(`${BACKEND_URL}/api/incidents`);
+      const data = await response.json();
 
-      const servicesData = await servicesRes.json();
-      const incidentsData = await incidentsRes.json();
-      const metricsData = await metricsRes.json();
-
-      setServices(servicesData.services || []);
-      setIncidents(incidentsData.incidents || []);
-      setMetrics(metricsData.metrics || []);
+      setIncidents(data.incidents || []);
     } catch (error) {
-      console.error("Failed to fetch dashboard data", error);
-    } finally {
-      setLoading(false);
+      console.error("Failed to load incidents", error);
     }
-  }
+  };
 
-  async function generateMetrics() {
-    await fetch(`${API_BASE_URL}/api/metrics/generate?count=10`, {
-      method: "POST",
-    });
-    await fetchDashboardData();
-  }
+  // Load metrics
+  const loadMetrics = async () => {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/api/metrics/generate?count=5&scenario=normal`,
+        {
+          method: "POST",
+        }
+      );
 
-  async function detectAnomalies() {
-    await fetch(`${API_BASE_URL}/api/anomalies/detect`, {
-      method: "POST",
-    });
-    await fetchDashboardData();
-  }
+      const data = await response.json();
 
-  async function injectFailure(type) {
-    await fetch(`${API_BASE_URL}/api/failures/inject/${type}`, {
-      method: "POST",
-    });
-    await fetchDashboardData();
-  }
+      setMetrics(data.metrics || []);
+    } catch (error) {
+      console.error("Failed to load metrics", error);
+    }
+  };
 
+  // Refresh everything
+  const refreshDashboard = async () => {
+    await loadIncidents();
+    await loadMetrics();
+  };
+
+  // Auto refresh every 5 sec
   useEffect(() => {
-    fetchDashboardData();
+    refreshDashboard();
+
+    const interval = setInterval(() => {
+      refreshDashboard();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="app">
-      <aside className="sidebar">
+      <div className="sidebar">
         <h2>AIOps</h2>
         <p>Root Cause Platform</p>
-      </aside>
+      </div>
 
-      <main className="main">
-        <header className="header">
+      <div className="main">
+        <div className="header">
           <div>
             <h1>AI Ops Root Cause Platform</h1>
-            <p>Distributed AI incident detection and root cause analysis dashboard</p>
+
+            <p>
+              Distributed AI incident detection and root cause analysis dashboard
+            </p>
           </div>
-          <span className="status-pill">System Online</span>
-        </header>
 
-        <section className="actions">
-          <button onClick={generateMetrics}>Generate Metrics</button>
-          <button onClick={detectAnomalies}>Detect Anomalies</button>
-          <button onClick={() => injectFailure("redis_timeout")}>
-            Inject Redis Timeout
+          <div className="status-pill">System Online</div>
+        </div>
+
+        <div className="actions">
+          <button onClick={refreshDashboard}>
+            Refresh Dashboard
           </button>
-          <button onClick={() => injectFailure("payment_gateway_failure")}>
-            Inject Payment Failure
-          </button>
-        </section>
+        </div>
 
-        {loading ? (
-          <p>Loading dashboard...</p>
-        ) : (
-          <>
-            <section className="cards">
-              <div className="card">
-                <h3>Total Services</h3>
-                <p>{services.length}</p>
-              </div>
+        <div className="cards">
+          <div className="card">
+            <h3>Total Incidents</h3>
+            <p>{incidents.length}</p>
+          </div>
 
-              <div className="card">
-                <h3>Open Incidents</h3>
-                <p>{incidents.length}</p>
-              </div>
+          <div className="card">
+            <h3>Total Metrics</h3>
+            <p>{metrics.length}</p>
+          </div>
 
-              <div className="card">
-                <h3>Latest Metrics</h3>
-                <p>{metrics.length}</p>
-              </div>
+          <div className="card">
+            <h3>Services</h3>
+            <p>3</p>
+          </div>
 
-              <div className="card">
-                <h3>AI RCA Status</h3>
-                <p>Ready</p>
-              </div>
-            </section>
+          <div className="card">
+            <h3>AI RCA Status</h3>
+            <p>Ready</p>
+          </div>
+        </div>
 
-            <section className="section">
-              <h2>Monitored Services</h2>
-              <div className="table">
-                {services.map((service) => (
-                  <div className="row" key={service.name}>
-                    <span>{service.name}</span>
-                    <span className="healthy">{service.status}</span>
-                    <span>{service.latency || "N/A"}</span>
-                    <span>active</span>
-                  </div>
-                ))}
-              </div>
-            </section>
+        {/* INCIDENTS */}
+        <div className="section">
+          <h2>Live Incidents</h2>
 
-            <section className="section">
-              <h2>Latest Service Metrics</h2>
-              <div className="table">
-                {metrics.map((metric) => (
-                  <div className="row" key={metric.id}>
-                    <span>{metric.service}</span>
-                    <span>{metric.latency_ms} ms</span>
-                    <span>{metric.error_rate}% errors</span>
-                    <span>{metric.cpu_usage}% CPU</span>
-                  </div>
-                ))}
-              </div>
-            </section>
+          <div className="table">
+            {incidents.map((incident) => (
+              <div className="row" key={incident.id}>
+                <div>{incident.service}</div>
 
-            <section className="section">
-              <h2>Recent Incidents</h2>
-              <div className="table">
-                {incidents.length === 0 ? (
-                  <p>No incidents detected yet.</p>
-                ) : (
-                  incidents.map((incident) => (
-                    <div className="row" key={incident.id}>
-                      <span>{incident.title}</span>
-                      <span>{incident.service}</span>
-                      <span className="severity">{incident.severity}</span>
-                      <span>{incident.status}</span>
-                    </div>
-                  ))
-                )}
+                <div className="severity">
+                  {incident.severity}
+                </div>
+
+                <div>{incident.title}</div>
+
+                <div>{incident.status}</div>
               </div>
-            </section>
-          </>
-        )}
-      </main>
+            ))}
+          </div>
+        </div>
+
+        {/* METRICS */}
+        <div className="section">
+          <h2>Latest Metrics</h2>
+
+          <div className="table">
+            {metrics.map((metric) => (
+              <div className="row" key={metric.id}>
+                <div>{metric.service}</div>
+
+                <div>{metric.latency_ms} ms</div>
+
+                <div>{metric.error_rate}% errors</div>
+
+                <div>{metric.cpu_usage}% CPU</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

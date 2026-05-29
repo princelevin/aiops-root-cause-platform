@@ -129,8 +129,7 @@ body {
 .actions {
   display: flex;
   gap: 12px;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
+  margin-bottom: 24px;
 }
 
 .actions button {
