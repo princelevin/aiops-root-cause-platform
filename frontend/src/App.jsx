@@ -6,6 +6,8 @@ function App() {
   const [metrics, setMetrics] = useState([]);
   const [severityFilter, setSeverityFilter] = useState("all");
   const [serviceFilter, setServiceFilter] = useState("all");
+  const [selectedIncident, setSelectedIncident] = useState(null);
+  const [correlationData, setCorrelationData] = useState(null);
 
   const BACKEND_URL = "http://127.0.0.1:8000";
 
@@ -27,6 +29,14 @@ function App() {
   const refreshDashboard = async () => {
     await loadIncidents();
     await loadMetrics();
+  };
+
+  const fetchCorrelation = async (incidentId) => {
+    const response = await fetch(`${BACKEND_URL}/api/correlation/${incidentId}`);
+    const data = await response.json();
+
+    setSelectedIncident(incidentId);
+    setCorrelationData(data);
   };
 
   useEffect(() => {
@@ -84,7 +94,10 @@ function App() {
         </div>
 
         <div className="filters">
-          <select value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)}>
+          <select
+            value={severityFilter}
+            onChange={(e) => setSeverityFilter(e.target.value)}
+          >
             <option value="all">All Severities</option>
             <option value="P0">P0 Critical</option>
             <option value="P1">P1 High</option>
@@ -92,7 +105,10 @@ function App() {
             <option value="P3">P3 Low</option>
           </select>
 
-          <select value={serviceFilter} onChange={(e) => setServiceFilter(e.target.value)}>
+          <select
+            value={serviceFilter}
+            onChange={(e) => setServiceFilter(e.target.value)}
+          >
             <option value="all">All Services</option>
             <option value="payment-service">payment-service</option>
             <option value="order-service">order-service</option>
@@ -112,7 +128,11 @@ function App() {
 
           <div className="table">
             {filteredIncidents.map((incident) => (
-              <div className="incident-row" key={incident.id}>
+              <div
+                className="incident-row"
+                key={incident.id}
+                onClick={() => fetchCorrelation(incident.id)}
+              >
                 <span>{incident.service}</span>
                 <span className={`badge ${incident.severity.toLowerCase()}`}>
                   {incident.severity}
@@ -124,8 +144,37 @@ function App() {
           </div>
         </div>
 
+        {correlationData && (
+          <div className="section">
+            <h2>Correlated Incidents</h2>
+
+            <p className="muted">
+              Selected Incident ID: {selectedIncident}
+            </p>
+
+            <div className="incident-header">
+              <span>Service</span>
+              <span>Score</span>
+              <span>Title</span>
+              <span>Reason</span>
+            </div>
+
+            <div className="table">
+              {correlationData.related_incidents?.map((item) => (
+                <div className="incident-row" key={item.incident_id}>
+                  <span>{item.service}</span>
+                  <span>{item.correlation_score}%</span>
+                  <span>{item.title}</span>
+                  <span>{item.reasons?.join(", ")}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="section">
           <h2>Latest Metrics</h2>
+
           <div className="table">
             {metrics.map((metric) => (
               <div className="row" key={metric.id}>
