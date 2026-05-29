@@ -20,10 +20,24 @@ def save_rca_analysis(db, analysis: dict):
 
 
 def get_rca_history(db):
-    return db.query(RootCauseAnalysisDB).order_by(RootCauseAnalysisDB.id.desc()).all()
+    return (
+        db.query(RootCauseAnalysisDB)
+        .order_by(RootCauseAnalysisDB.id.desc())
+        .all()
+    )
 
 
 def get_rca_by_incident_id(db, incident_id: int):
+    return (
+        db.query(RootCauseAnalysisDB)
+        .filter(RootCauseAnalysisDB.incident_id == incident_id)
+        .order_by(RootCauseAnalysisDB.id.desc())
+        .first()
+    )
+
+
+# Needed by Day 24 Incident Report Generator
+def get_latest_rca_by_incident_id(db, incident_id: int):
     return (
         db.query(RootCauseAnalysisDB)
         .filter(RootCauseAnalysisDB.incident_id == incident_id)

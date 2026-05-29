@@ -22,3 +22,7 @@ def get_timeline_by_incident(db, incident_id: int):
         .order_by(IncidentTimelineDB.id.asc())
         .all()
     )
+
+
+def get_timeline_events_by_incident_id(db, incident_id: int):
+    return get_timeline_by_incident(db, incident_id)
